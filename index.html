@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="index.css">
+    <title>BookShelf</title>
+</head>
+<body>
+    <header>
+        <h1>BookShelf</h1>
+        <h3>Place where you store your book</h3>
+    </header>
+    <main>
+        <article id="inputField">
+            <section>
+                <input id="bookTitle" type="text" placeholder="New book tittle">
+                <input id="bookAuthor" type="text" placeholder="New book Author">
+                <input id="bookYear" type="number" placeholder="New book Year">
+            </section>
+            <button id="add">Add</button>
+        </article>
+        <div class="row">
+            <div class="column">
+                <h4>Read Book</h4>
+                <table id="read">
+                    <th>Tittle</th>
+                    <th>Author</th>
+                    <th>Year</th>
+                    <th>Status</th>
+                </table>
+            </div>
+            <div class="column">
+                <h4>Finished Book</h4>
+                <table id="finish">
+                    <th>Tittle</th>
+                    <th>Author</th>
+                    <th>Year</th>
+                    <th>Status</th>
+                </table>
+            </div>
+        </div>
+    </main>
+    <footer>
+        <p>Copyright &#169; BookShelf. All rights reserved.</p>
+    </footer>
+
+    <script type="text/javascript">
+        let bookList;
+        showBook();
+
+        //Ambil dari localStorage
+        function showBook(){
+            let getLocalStorage = localStorage.getItem('BookShelf');
+            if (getLocalStorage == null){
+                bookList = {data: [], count: 0};
+            }
+            else {
+                bookList = JSON.parse(getLocalStorage);
+            }
+            let readBook = `
+                <tr>
+                    <th>Tittle</th>
+                    <th>Author</th>
+                    <th>Year</th>
+                    <th>Status</th>
+                </tr>
+            `;
+            let finishedBook = `
+                <tr>
+                    <th>Tittle</th>
+                    <th>Author</th>
+                    <th>Year</th>
+                    <th>Status</th>
+                </tr>
+            `;
+            bookList.data.forEach((element, index) => {
+                // console.log(`data: ${index} and ${element.title}`);
+                if (!element.isComplete) {
+                    readBook += `
+                        <tr>
+                            <td>${element.title}</td>
+                            <td>${element.author}</td>
+                            <td>${element.year}</td>
+                            <td>
+                                <button onclick="checkBook(${index})" id="done">Finish</button>
+                                <button onclick="deleteBook(${index})" id="delete">Delete</button>
+                            </td>
+                        </tr>
+                    `;
+                } else {
+                    finishedBook += `
+                        <tr>
+                            <td>${element.title}</td>
+                            <td>${element.author}</td>
+                            <td>${element.year}</td>
+                            <td>
+                                <button onclick="checkBook(${index})" id="reread">Reread</button>
+                                <button onclick="deleteBook(${index})" id="delete">Delete</button>
+                            </td>
+                        </tr>
+                    `;
+                }
+            });
+            document.querySelector('#read').innerHTML = readBook;
+            document.querySelector('#finish').innerHTML = finishedBook;
+        }
+
+        //Nambahin Buku
+        document.querySelector('#add').onclick = () => {
+            if (document.querySelector('#bookTitle').value.length == 0 || document.querySelector('#bookAuthor').value.length == 0 || document.querySelector('#bookYear').value == 0) {
+                window.alert('Please insert a Book Data');
+            }
+            else {
+                bookList.count++;
+                var newBook = {
+                    id: bookList.count,
+                    title: `${document.querySelector('#bookTitle').value}`,
+                    author: `${document.querySelector('#bookAuthor').value}`,
+                    year: `${document.querySelector('#bookYear').value}`,
+                    isComplete: false,
+                };
+                bookList.data.push(newBook);
+                // console.log(bookList);
+                // console.log(JSON.stringify(bookList));
+                localStorage.setItem('BookShelf', JSON.stringify(bookList));
+                document.querySelector('#bookTitle').value = '';
+                document.querySelector('#bookAuthor').value = '';
+                document.querySelector('#bookYear').value = '';
+                showBook();
+            }
+        }
+
+        // Pindahin buku ke Finished Book
+        function checkBook(index){
+            let temp = !bookList.data[index].isComplete;
+            bookList.data[index].isComplete = temp;
+            localStorage.setItem('BookShelf', JSON.stringify(bookList));
+            showBook();
+        }
+
+        // Delete Buku
+        function deleteBook(index){
+            bookList.data.splice(index, 1);
+            localStorage.setItem('BookShelf', JSON.stringify(bookList));
+            showBook();
+        }
+    </script>
+</body>
+</html>
